@@ -1,2 +1,2 @@
 # xlsx2sql
-xlsx to sql
+xlsx to SQL
