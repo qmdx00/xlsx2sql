@@ -36,7 +36,7 @@ func (s *singleSQL) Render() string {
 
 	vals := make([]string, 0, len(s.vals))
 	for _, val := range s.vals {
-		vals = append(vals, "`"+val+"`")
+		vals = append(vals, "'"+val+"'")
 	}
 	sql += strings.Join(vals, ", ")
 	sql += ");"

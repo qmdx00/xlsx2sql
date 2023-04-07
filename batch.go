@@ -39,7 +39,7 @@ func (s *batchSQL) Render() string {
 	for _, val := range s.vals {
 		row = "("
 		for j, v := range val {
-			val[j] = "`" + v + "`"
+			val[j] = "'" + v + "'"
 		}
 		row += strings.Join(val, ", ")
 		row += ")"

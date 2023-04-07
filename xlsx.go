@@ -1,6 +1,9 @@
 package xlsx2sql
 
 import (
+	"log"
+	"os"
+
 	"github.com/xuri/excelize/v2"
 )
 
@@ -138,6 +141,22 @@ func (x *xlsx) Build() (sqls []Statement) {
 	return
 }
 
+func ExportSQL(filepath string, sqls []Statement) (err error) {
+	file, err := os.Create(filepath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	if err = writeSQLs(file, sqls); err != nil {
+		return
+	}
+
+	log.Printf("Total: %d SQL", len(sqls))
+
+	return
+}
+
 // ==============================================================//
 // ========================= private ===========================//
 // ==============================================================//
@@ -217,4 +236,14 @@ func (x *xlsx) batchSQL() (sqls []Statement) {
 		}
 	}
 	return
+}
+
+// writeSQLs writes the given SQL statements to the given file, separated by newlines.
+// The file is not closed after the SQL statements are written.
+func writeSQLs(file *os.File, sqls []Statement) error {
+	for _, sql := range sqls {
+		file.WriteString(string(sql.Render()))
+		file.WriteString("\n")
+	}
+	return nil
 }
