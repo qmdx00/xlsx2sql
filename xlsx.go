@@ -62,8 +62,9 @@ func New(path string, opts ...Option) *xlsx {
 }
 
 // readSheet reads the spreadsheet and sends the rows to the channel.
-func (x *xlsx) readSheet() (xlsx xlsx, err error) {
+func (x *xlsx) readSheet() (err error) {
 	if x.file, err = excelize.OpenFile(x.path); err != nil {
+		x.done <- struct{}{}
 		return
 	}
 	defer x.file.Close()
@@ -74,6 +75,7 @@ func (x *xlsx) readSheet() (xlsx xlsx, err error) {
 	}
 	rows, err := x.file.Rows(sheet)
 	if err != nil {
+		x.done <- struct{}{}
 		return
 	}
 
@@ -128,9 +130,12 @@ func (x *xlsx) Valuers(valuers map[string]Valuer) *xlsx {
 }
 
 // Build ...
-func (x *xlsx) Build() (sqls []Statement) {
+func (x *xlsx) Build() (sqls []Statement, err error) {
 	// read the spreadsheet
-	x.readSheet()
+	if err = x.readSheet(); err != nil {
+		return
+	}
+	// build the statements
 	sqls = make([]Statement, 0, len(x.rows))
 	switch x.opts.mode {
 	case ModeSingle:
@@ -141,6 +146,7 @@ func (x *xlsx) Build() (sqls []Statement) {
 	return
 }
 
+// ExportSQL ...
 func ExportSQL(filepath string, sqls []Statement) (err error) {
 	file, err := os.Create(filepath)
 	if err != nil {
