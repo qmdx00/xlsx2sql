@@ -12,7 +12,7 @@ type Valuer func(string) string
 
 // xlsx ...
 type xlsx struct {
-	// opts is the options for the xlsx.Writer.
+	// opts is the options for the xlsx struct.
 	opts options
 
 	// done is the channel that is closed when the xlsx.Writer is done.
@@ -63,7 +63,7 @@ func New(path string, opts ...Option) *xlsx {
 
 // readSheet reads the spreadsheet and sends the rows to the channel.
 func (x *xlsx) readSheet() (err error) {
-	if x.file, err = excelize.OpenFile(x.path); err != nil {
+	if x.file, err = excelize.OpenFile(x.path, x.opts.excelizeOpts...); err != nil {
 		x.done <- struct{}{}
 		return
 	}
@@ -248,7 +248,8 @@ func (x *xlsx) batchSQL() (sqls []Statement) {
 // The file is not closed after the SQL statements are written.
 func writeSQLs(file *os.File, sqls []Statement) error {
 	for _, sql := range sqls {
-		file.WriteString(string(sql.Render()))
+		text := sql.Render()
+		file.WriteString(text)
 		file.WriteString("\n")
 	}
 	return nil

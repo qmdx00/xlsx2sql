@@ -25,20 +25,33 @@ func (*singleSQL) mode() string {
 // Render returns a string of SQL that can be used to insert the values
 // into the database. The string is formatted as an INSERT statement.
 func (s *singleSQL) Render() string {
-	sql := "INSERT INTO `" + s.opts.table + "` ("
+	var sb strings.Builder
+	// Write the beginning of the statement.
+	sb.WriteString("INSERT INTO `")
+	sb.WriteString(s.opts.table)
+	sb.WriteString("` (")
 
-	keys := make([]string, 0, len(s.keys))
-	for _, key := range s.keys {
-		keys = append(keys, "`"+key+"`")
+	// Write the keys.
+	for i, key := range s.keys {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString("`")
+		sb.WriteString(key)
+		sb.WriteString("`")
 	}
-	sql += strings.Join(keys, ", ")
-	sql += ") VALUES ("
+	sb.WriteString(") VALUES (")
 
-	vals := make([]string, 0, len(s.vals))
-	for _, val := range s.vals {
-		vals = append(vals, "'"+val+"'")
+	// Write the values.
+	for i, val := range s.vals {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString("'")
+		sb.WriteString(val)
+		sb.WriteString("'")
 	}
-	sql += strings.Join(vals, ", ")
-	sql += ");"
-	return sql
+	// Write the end of the statement.
+	sb.WriteString(");")
+	return sb.String()
 }

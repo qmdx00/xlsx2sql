@@ -1,15 +1,18 @@
 package xlsx2sql
 
+import "github.com/xuri/excelize/v2"
+
 // Option is a function that sets an option.
 type Option func(*options)
 
 // options ...
 type options struct {
-	mode       string
-	table      string
-	skipHeader bool
-	batchSize  int
-	sheet      string
+	excelizeOpts []excelize.Options
+	mode         string
+	table        string
+	skipHeader   bool
+	batchSize    int
+	sheet        string
 }
 
 // defaultOptions is a variable that contains a set of default options.
@@ -18,9 +21,10 @@ type options struct {
 // The default options are: "single" mode, batch size of 10, and skipHeader
 // set to true.
 var defaultOptions = options{
-	mode:       "single",
-	batchSize:  10,
-	skipHeader: true,
+	excelizeOpts: make([]excelize.Options, 0),
+	mode:         "single",
+	batchSize:    10,
+	skipHeader:   true,
 }
 
 // SQLMode is an option that sets the SQL mode.
@@ -55,5 +59,12 @@ func TableName(table string) Option {
 func SheetName(sheet string) Option {
 	return func(o *options) {
 		o.sheet = sheet
+	}
+}
+
+// ExcelizeOptions is an option that sets the options for the excelize package.
+func ExcelizeOptions(opts ...excelize.Options) Option {
+	return func(o *options) {
+		o.excelizeOpts = opts
 	}
 }

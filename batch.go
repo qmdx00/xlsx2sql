@@ -25,27 +25,38 @@ func (s *batchSQL) mode() string {
 // Render returns a string of SQL that can be used to insert the values
 // into the database. The string is formatted as an INSERT statement.
 func (s *batchSQL) Render() string {
-	sql := "INSERT INTO `" + s.opts.table + "` ("
-
-	keys := make([]string, 0, len(s.keys))
-	for _, key := range s.keys {
-		keys = append(keys, "`"+key+"`")
-	}
-	sql += strings.Join(keys, ", ")
-	sql += ") VALUES "
-
-	rows := make([]string, 0, len(s.vals))
-	var row string
-	for _, val := range s.vals {
-		row = "("
-		for j, v := range val {
-			val[j] = "'" + v + "'"
+	var sb strings.Builder
+	// Write the beginning of the statement.
+	sb.WriteString("INSERT INTO `")
+	sb.WriteString(s.opts.table)
+	sb.WriteString("` (")
+	// Write the keys.
+	for i, key := range s.keys {
+		if i > 0 {
+			sb.WriteString(", ")
 		}
-		row += strings.Join(val, ", ")
-		row += ")"
-		rows = append(rows, row)
+		sb.WriteString("`")
+		sb.WriteString(key)
+		sb.WriteString("`")
 	}
-	sql += strings.Join(rows, ", ")
-	sql += ";"
-	return sql
+	sb.WriteString(") VALUES ")
+	// Write the values.
+	for i, val := range s.vals {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString("(")
+		for j, v := range val {
+			if j > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString("'")
+			sb.WriteString(v)
+			sb.WriteString("'")
+		}
+		sb.WriteString(")")
+	}
+	// Write the end of the statement.
+	sb.WriteString(";")
+	return sb.String()
 }

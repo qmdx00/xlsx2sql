@@ -10,7 +10,6 @@ go get github.com/qmdx00/xlsx2sql
 
 ## Usage
 
-
 Example test.xlsx file:
 
 | id  | name   |
@@ -19,7 +18,7 @@ Example test.xlsx file:
 | 2   | test02 |
 | 3   | test03 |
 
-### Single insert
+### Single insert statements
 
 ```go
 xlsx.New("test.xlsx", xlsx.SQLMode(xlsx.ModeSingle), xlsx.TableName("test")).
@@ -36,7 +35,7 @@ INSERT INTO `test` (`id`, `name`, `key`) VALUES ('2', 'test02', 'value');
 INSERT INTO `test` (`id`, `name`, `key`) VALUES ('3', 'test03', 'value');
 ```
 
-### Batch insert
+### Batch insert statements
 
 ```go
 xlsx.New("test.xlsx", xlsx.SQLMode(xlsx.ModeBatch), xlsx.BatchSize(100), xlsx.TableName("test")).
@@ -58,28 +57,28 @@ INSERT INTO `test` (`id`, `name`, `key`) VALUES
 
 ```go
 xlsx.New("test.xlsx", xlsx.SQLMode(xlsx.ModeBatch), xlsx.BatchSize(100), xlsx.TableName("test")).
-  Mapped("id", 0).          // get id from xlsx column 0
-  Mapped("name", 1).        // get name from xlsx column 1
-  Columns("key", "value").  // set key with value
-  Valuer("id", func(v string) string {
+  Mapped("idx", 0).                       // get id from xlsx column 0
+  Mapped("name", 1).                      // get name from xlsx column 1
+  Columns("key", "value").                // set key with value
+  Valuer("idx", func(v string) string {   // custom value processor
     id, _ := strconv.Atoi(v)
-    return fmt.Sprintf("%d", id+1)
+    return fmt.Sprintf("%d", id - 1)
   }).Build()
 ```
 
 Output:
 ```SQL
-INSERT INTO `test` (`id`, `name`, `key`) VALUES
-('2', 'test01', 'value'),
-('3', 'test02', 'value'),
-('4', 'test03', 'value');
+INSERT INTO `test` (`idx`, `name`, `key`) VALUES
+('0', 'test01', 'value'),
+('1', 'test02', 'value'),
+('2', 'test03', 'value');
 ```
 
-### Mappping columns
+### Mappping columns with Header
 
 ```go
 xlsx.New("test.xlsx", xlsx.SQLMode(xlsx.ModeBatch), xlsx.BatchSize(100), xlsx.TableName("test")).
-  Header("id", "name").     // map columns
+  Header("id", "name").     // mapping columns
   Columns("key", "value").  // set key with value
   Build()
 ```
@@ -94,4 +93,4 @@ INSERT INTO `test` (`id`, `name`, `key`) VALUES
 
 ## License
 © Wimi Yuan, 2023~time.Now <br>
-Released under the [Apache License](./LICENSE).
+Released under the [MIT License](./LICENSE).
