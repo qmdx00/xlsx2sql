@@ -135,6 +135,9 @@ func (x *xlsx) Build() (sqls []Statement, err error) {
 	if err = x.readSheet(); err != nil {
 		return
 	}
+
+	log.Printf("Total: %d Rows", len(x.rows))
+
 	// build the statements
 	sqls = make([]Statement, 0, len(x.rows))
 	switch x.opts.mode {
